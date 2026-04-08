@@ -3,6 +3,7 @@ import { ToastContainer, useToasts, SkeletonCard } from './components/ui.jsx';
 import { ProductCard, ProductModal, CartSidebar } from './components/shop.jsx';
 import { CheckoutModal } from './components/checkout.jsx';
 import { AdminPanel } from './components/admin.jsx';
+import { ClusterDashboard } from './components/cluster.jsx';
 import { CATEGORIES, API_BASE, CART_ID } from './data.js';
 
 /* ─── ONYX PALETTE ────────────────────────────────── */
@@ -213,7 +214,7 @@ function InputField({ label, type, value, onChange, placeholder, accent }) {
 }
 
 /* ─── NAVBAR ─────────────────────────────────────────── */
-function Navbar({ user, search, setSearch, onCart, cartCount, wishCount, onLogout, cat, setCat, theme, toggleTheme, showAdmin, onToggleAdmin }) {
+function Navbar({ user, search, setSearch, onCart, cartCount, wishCount, onLogout, cat, setCat, theme, toggleTheme, showAdmin, onToggleAdmin, showCluster, onToggleCluster }) {
   return (
     <header style={{ position:'sticky', top:0, zIndex:50, background:'var(--bg-card)', boxShadow:'0 1px 0 var(--border-light)' }}>
       <div style={{ maxWidth:'1400px', margin:'0 auto', padding:'0 20px', height:'60px', display:'flex', alignItems:'center', gap:'16px' }}>
@@ -234,17 +235,30 @@ function Navbar({ user, search, setSearch, onCart, cartCount, wishCount, onLogou
         <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:'10px', flexShrink:0 }}>
           {/* Admin toggle */}
           {user.role === 'admin' && (
-            <button onClick={onToggleAdmin}
-              style={{
-                height:'34px', padding:'0 14px', borderRadius:'10px', border:'none', cursor:'pointer',
-                fontWeight:700, fontSize:'12px', display:'flex', alignItems:'center', gap:'6px',
-                transition:'all .2s',
-                background: showAdmin ? S.gradient : 'var(--bg-subtle)',
-                color: showAdmin ? '#fff' : 'var(--text-secondary)',
-                boxShadow: showAdmin ? `0 4px 12px ${S.shadow}` : 'none',
-              }}>
-              {showAdmin ? 'Store' : 'Admin'}
-            </button>
+            <>
+              <button onClick={onToggleAdmin}
+                style={{
+                  height:'34px', padding:'0 14px', borderRadius:'10px', border:'none', cursor:'pointer',
+                  fontWeight:700, fontSize:'12px', display:'flex', alignItems:'center', gap:'6px',
+                  transition:'all .2s',
+                  background: showAdmin ? S.gradient : 'var(--bg-subtle)',
+                  color: showAdmin ? '#fff' : 'var(--text-secondary)',
+                  boxShadow: showAdmin ? `0 4px 12px ${S.shadow}` : 'none',
+                }}>
+                {showAdmin ? 'Store' : 'Admin'}
+              </button>
+              <button onClick={onToggleCluster}
+                style={{
+                  height:'34px', padding:'0 14px', borderRadius:'10px', border:'none', cursor:'pointer',
+                  fontWeight:700, fontSize:'12px', display:'flex', alignItems:'center', gap:'6px',
+                  transition:'all .2s',
+                  background: showCluster ? 'linear-gradient(135deg, #06b6d4, #22d3ee)' : 'var(--bg-subtle)',
+                  color: showCluster ? '#fff' : 'var(--text-secondary)',
+                  boxShadow: showCluster ? '0 4px 12px rgba(34,211,238,0.35)' : 'none',
+                }}>
+                🌐 Cluster
+              </button>
+            </>
           )}
 
           <button onClick={toggleTheme} style={{
@@ -356,6 +370,7 @@ export default function App() {
   const [orderCount, setOrderCount] = useState(0);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showCluster, setShowCluster] = useState(false);
 
   // ─── Fetch products from API ───
   const fetchProducts = useCallback(async () => {
@@ -457,12 +472,14 @@ export default function App() {
       <CartSidebar open={sidebar} onClose={()=>setSidebar(false)} cart={cart} products={products} onCheckout={()=>{ setSidebar(false); setCheckoutOpen(true); }} loading={loading} S={S}/>
       {checkoutOpen && <CheckoutModal cart={cart} products={products} onClose={()=>setCheckoutOpen(false)} onConfirm={checkout} loading={loading}/>}
 
-      <Navbar user={user} search={search} setSearch={setSearch} onCart={()=>setSidebar(true)} cartCount={cartCount} wishCount={wishlist.length} onLogout={()=>{ setUser(null); setShowAdmin(false); }} cat={cat} setCat={setCat} theme={theme} toggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} showAdmin={showAdmin} onToggleAdmin={() => setShowAdmin(a => !a)}/>
+      <Navbar user={user} search={search} setSearch={setSearch} onCart={()=>setSidebar(true)} cartCount={cartCount} wishCount={wishlist.length} onLogout={()=>{ setUser(null); setShowAdmin(false); setShowCluster(false); }} cat={cat} setCat={setCat} theme={theme} toggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} showAdmin={showAdmin} onToggleAdmin={() => { setShowAdmin(a => !a); setShowCluster(false); }} showCluster={showCluster} onToggleCluster={() => { setShowCluster(c => !c); setShowAdmin(false); }}/>
 
       <main style={{ maxWidth:'1400px', margin:'0 auto', padding:'32px 20px' }}>
 
-        {/* ─── ADMIN PANEL ─── */}
-        {showAdmin && user.role === 'admin' ? (
+        {/* ─── CLUSTER DASHBOARD ─── */}
+        {showCluster && user.role === 'admin' ? (
+          <ClusterDashboard toast={toast}/>
+        ) : showAdmin && user.role === 'admin' ? (
           <AdminPanel products={products} onRefresh={fetchProducts} toast={toast}/>
         ) : (
           <>

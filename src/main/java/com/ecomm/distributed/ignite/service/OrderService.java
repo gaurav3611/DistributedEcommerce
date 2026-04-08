@@ -58,12 +58,10 @@ public class OrderService {
         order.setUsername(username);
         order.setItems(items);
         order.setTotal(total);
-        order.setStatus("PLACED");
         order.setPlacedAt(System.currentTimeMillis());
         order.setShippingAddress(address != null ? address : "Default Address");
         order.setPaymentMethod(paymentMethod != null ? paymentMethod : "UPI");
         order.setPaymentReference(paymentReference);
-
         order.setStatus("PENDING_VERIFICATION");
 
         orderStore.put(orderId, order);

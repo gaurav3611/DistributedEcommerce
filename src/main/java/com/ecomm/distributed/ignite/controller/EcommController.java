@@ -21,6 +21,7 @@ public class EcommController {
     @Autowired private ProductService productService;
     @Autowired private UserService userService;
     @Autowired private OrderService orderService;
+    @Autowired private ClusterMonitorService clusterMonitorService;
 
     // ─── AUTH ────────────────────────────────────────────
 
@@ -234,5 +235,28 @@ public class EcommController {
     public ResponseEntity<String> verifyOrder(@PathVariable String orderId) {
         orderService.verifyAndConfirmOrder(orderId);
         return ResponseEntity.ok("Order confirmed");
+    }
+
+    // ─── CLUSTER MONITOR (Distributed Storage Demo) ─────
+
+    @GetMapping("/cluster/health")
+    public Map<String, Object> getClusterHealth() {
+        return clusterMonitorService.getClusterHealth();
+    }
+
+    @GetMapping("/cluster/nodes")
+    public List<Map<String, Object>> getDataNodes() {
+        return clusterMonitorService.getDataNodeInfo();
+    }
+
+    @GetMapping("/cluster/files")
+    public List<Map<String, Object>> getFileDistribution() {
+        return clusterMonitorService.getFileDistribution();
+    }
+
+    @GetMapping("/cluster/activity")
+    public List<Map<String, Object>> getRecentActivity(
+            @RequestParam(defaultValue = "20") int limit) {
+        return clusterMonitorService.getRecentActivity(limit);
     }
 }
